@@ -1,8 +1,35 @@
+<div align="center">
+
 # J.A.R.V.I.S.
 
-**Just A Rather Very Intelligent System** — A voice notification assistant for Claude Code.
+### Just A Rather Very Intelligent System
 
-Jarvis speaks aloud when important events happen during your Claude Code session: task completions, permission requests, errors, session start/end, and more. Think Iron Man's AI butler, but for your terminal.
+*Your AI butler for the terminal — Iron Man-style voice notifications for Claude Code*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-43853d.svg)](https://nodejs.org/)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen.svg)](#)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Hooks-7c3aed.svg)](https://docs.anthropic.com/en/docs/claude-code/hooks)
+
+<br>
+
+**Jarvis speaks to you** when tasks complete, permissions are needed, errors occur, and more.
+
+*"All systems online, sir."*
+
+<br>
+
+---
+
+</div>
+
+<br>
+
+## Overview
+
+Jarvis plugs into [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to deliver real-time voice notifications during your coding sessions. It announces task completions with elapsed time, alerts you to permission prompts so you never miss them, reports build and test results, and greets you with dry British wit — all without ever blocking your workflow.
+
+<br>
 
 ## Quick Start
 
@@ -14,102 +41,167 @@ node jarvis/bin/jarvis.mjs install
 
 # Test voice output
 node jarvis/bin/jarvis.mjs test
-
-# Uninstall when done
-node jarvis/bin/jarvis.mjs uninstall
 ```
 
-## How It Works
+That's it. Jarvis will greet you on your next session.
 
-Jarvis uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) — shell commands that fire automatically on lifecycle events. The installer adds hook entries to `~/.claude/settings.json` that call `jarvis-hook.mjs` with event data via stdin.
+<br>
 
-### Events Handled
+## Features
+
+<table>
+<tr>
+<td width="50%">
+
+#### Voice Notifications
+Get spoken alerts for task completions, errors, permission requests, and session events — no more staring at the terminal waiting.
+
+</td>
+<td width="50%">
+
+#### Smart Filtering
+Only announces what matters: agent dispatches, build results, and critical events. Ignores routine file reads and simple commands.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### Multi-Platform TTS
+Works everywhere — premium AI voice via ElevenLabs, native system TTS on macOS/Linux/Windows, or simple stderr fallback.
+
+</td>
+<td width="50%">
+
+#### Zero Dependencies
+Pure Node.js with no external packages. Lightweight, fast, and nothing to break.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### Jarvis Personality
+Dry British wit, formal but warm, occasionally sarcastic. Every message is crafted with character.
+
+</td>
+<td width="50%">
+
+#### Non-Blocking Design
+Always exits with code 0. Never blocks Claude Code, even if speech synthesis fails entirely.
+
+</td>
+</tr>
+</table>
+
+<br>
+
+## Events
+
+Jarvis listens to the full Claude Code lifecycle:
 
 | Event | What Jarvis Says |
-|---|---|
-| **SessionStart** | Greeting ("All systems online, sir.") |
-| **SessionEnd** | Farewell ("Signing off, sir.") |
+|:---|:---|
+| **SessionStart** | Greeting — *"All systems online, sir."* |
+| **SessionEnd** | Farewell — *"Signing off, sir."* |
 | **Stop** | Task summary with tool count and elapsed time |
 | **StopFailure** | API error announcement |
-| **Notification** | Permission prompt (debounced to 10s) |
+| **Notification** | Permission prompt *(debounced to 10s)* |
 | **PermissionRequest** | Tool-specific approval request |
-| **PreToolUse** | Agent dispatch announcement (Agent tool only) |
-| **PostToolUse** | Build/test result (Bash tool only) |
+| **PreToolUse** | Agent dispatch announcement |
+| **PostToolUse** | Build/test result summary |
 | **PostToolUseFailure** | Error description |
 | **SubagentStop** | Sub-agent completion |
-| **PreCompact** | Long-running task update |
+| **PreCompact** | Long-running task status update |
+
+<br>
 
 ## Voice Engines
 
-Jarvis tries voice engines in this order:
+Jarvis selects the best available voice engine automatically:
 
-1. **ElevenLabs API** — Premium AI voice (requires API key)
-2. **System TTS** — Platform-native fallback:
-   - **macOS**: `say` command (Daniel voice, rate 180)
-   - **Linux**: `espeak-ng` → `espeak` → `spd-say` → `piper`
-   - **Windows**: PowerShell SAPI
-3. **Stderr** — If no TTS is available, messages print to stderr
+```
+ 1.  ElevenLabs API     Premium AI voice (requires API key)
+ 2.  System TTS         Platform-native fallback
+      ├─ macOS           say command (Daniel voice, rate 180)
+      ├─ Linux           espeak-ng → espeak → spd-say → piper
+      └─ Windows         PowerShell SAPI
+ 3.  Stderr             Messages print to terminal if no TTS available
+```
+
+<br>
 
 ## Configuration
 
-All configuration is via environment variables:
+All settings via environment variables — no config files needed:
 
 | Variable | Default | Description |
-|---|---|---|
-| `ELEVENLABS_API_KEY` | *(none)* | ElevenLabs API key for premium voice |
-| `JARVIS_VOICE_ID` | `onwK4e9ZLuTAKqWW03F9` | ElevenLabs voice ID (default: Daniel) |
+|:---|:---|:---|
+| `ELEVENLABS_API_KEY` | — | ElevenLabs API key for premium voice |
+| `JARVIS_VOICE_ID` | `onwK4e9ZLuTAKqWW03F9` | ElevenLabs voice ID (Daniel) |
 | `JARVIS_MODEL` | `eleven_turbo_v2_5` | ElevenLabs model |
 | `JARVIS_MACOS_VOICE` | `Daniel` | macOS `say` voice name |
 | `JARVIS_MACOS_RATE` | `180` | macOS `say` speech rate |
 
-## CLI Commands
+<br>
+
+## CLI
 
 ```
-jarvis test        — Test voice engine with a greeting
-jarvis install     — Install Claude Code hooks
-jarvis uninstall   — Remove Claude Code hooks
-jarvis status      — Show current configuration
-jarvis say <text>  — Speak arbitrary text
-jarvis help        — Show help
+jarvis install       Install Claude Code hooks
+jarvis uninstall     Remove Claude Code hooks
+jarvis test          Test voice engine with a greeting
+jarvis status        Show current configuration
+jarvis say <text>    Speak arbitrary text
+jarvis help          Show help
 ```
+
+<br>
 
 ## Architecture
 
 ```
-jarvis/
+jarvis-claude-code/
 ├── bin/
-│   ├── jarvis.mjs      # CLI entry point
-│   ├── install.mjs      # Hook installer
-│   └── uninstall.mjs    # Hook uninstaller
+│   ├── jarvis.mjs          CLI entry point
+│   ├── install.mjs         Hook installer
+│   └── uninstall.mjs       Hook uninstaller
 ├── hooks/
-│   └── jarvis-hook.mjs  # Unified hook handler (all events)
+│   └── jarvis-hook.mjs     Unified hook handler (all events)
 ├── src/
-│   ├── voice.mjs        # TTS engine (ElevenLabs + system fallback)
-│   └── personality.mjs  # Message generator (Jarvis-style wit)
+│   ├── voice.mjs           TTS engine (ElevenLabs + system fallback)
+│   └── personality.mjs     Message generator (Jarvis-style wit)
 └── package.json
 ```
 
-### Key Design Decisions
+**Design principles:**
 
-- **Single hook handler** — One script (`jarvis-hook.mjs`) handles all events, reading the event type from `argv[2]` and payload from stdin JSON.
-- **State tracking** — A temp file (`/tmp/jarvis-state.json`) tracks session start time, tool count, and debounce timestamps across hook invocations.
-- **Always exits 0** — The hook never blocks Claude Code, even if TTS fails.
-- **Debounced notifications** — Notification events are throttled to once per 10 seconds to prevent spam.
-- **Smart filtering** — Only announces "big" events: Agent dispatches (not every file read), build/test commands (not every `ls`).
+- **Single hook handler** — One script handles all events, reading the event type from `argv[2]` and payload from stdin
+- **State tracking** — Temp file (`/tmp/jarvis-state.json`) persists session time, tool count, and debounce timestamps across invocations
+- **Debounced notifications** — Throttled to once per 10 seconds to prevent notification spam
+- **Graceful degradation** — Voice engine cascade ensures something always works
 
-## Installing a TTS Engine (Linux)
+<br>
+
+## Installing TTS on Linux
 
 ```bash
-# Best quality free option
+# Recommended
 sudo apt install espeak-ng
 
-# Alternative
+# Alternatives
 sudo apt install espeak
-
-# Or for speech-dispatcher
 sudo apt install speech-dispatcher
 ```
 
-## License
+<br>
 
-Part of the [Paperclip](https://github.com/roy-substrate/paperclip) project.
+---
+
+<div align="center">
+
+**Part of the [Paperclip](https://github.com/roy-substrate/paperclip) project**
+
+MIT License
+
+</div>
